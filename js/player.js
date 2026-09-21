@@ -1,5 +1,5 @@
 /* ============================================
-   PLAYER - Ship rendering & laser beams
+   PLAYER - Gun rendering & laser beams
    ============================================ */
 class Player {
     constructor(canvas) {
@@ -20,7 +20,7 @@ class Player {
     fireLaser(targetX, targetY) {
         this.lasers.push({
             x1: this.x,
-            y1: this.y - this.height / 2,
+            y1: this.y - 36,
             x2: targetX,
             y2: targetY,
             life: 0.15,
@@ -40,10 +40,7 @@ class Player {
             }
         }
 
-        // Engine particles
-        if (Math.random() > 0.5) {
-            particleSystem.createEngineTrail(this.x, this.y + this.height / 2 - 5);
-        }
+        // (gun: no engine trail)
     }
 
     drawShip(ctx) {
@@ -54,58 +51,105 @@ class Player {
         ctx.save();
         ctx.translate(x, y);
 
-        // Ship body - sleek triangle
+        const steelLight = '#4a6a80';
+        const steel = '#2b4256';
+        const steelDark = '#141f2a';
+        const neon = '#00ffd5';
+
+        // Muzzle flash glow (barrel tip)
+        ctx.save();
+        ctx.shadowColor = neon;
+        ctx.shadowBlur = 16 * glow;
         ctx.beginPath();
-        ctx.moveTo(0, -25);
-        ctx.lineTo(-18, 20);
-        ctx.lineTo(-8, 15);
-        ctx.lineTo(0, 18);
-        ctx.lineTo(8, 15);
-        ctx.lineTo(18, 20);
-        ctx.closePath();
-
-        // Ship gradient
-        const grad = ctx.createLinearGradient(0, -25, 0, 20);
-        grad.addColorStop(0, '#00ffd5');
-        grad.addColorStop(0.5, '#0088aa');
-        grad.addColorStop(1, '#003344');
-        ctx.fillStyle = grad;
+        ctx.ellipse(0, -38, 4.5, 3, 0, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(0, 255, 213, ${0.55 + 0.45 * glow})`;
         ctx.fill();
+        ctx.restore();
 
-        // Ship outline glow
-        ctx.strokeStyle = `rgba(0, 255, 213, ${glow * 0.8})`;
-        ctx.lineWidth = 1.5;
+        // Barrel (nòng súng)
+        const barrelGrad = ctx.createLinearGradient(0, -38, 0, -8);
+        barrelGrad.addColorStop(0, steelLight);
+        barrelGrad.addColorStop(1, steel);
+        ctx.beginPath();
+        ctx.moveTo(-4, -38);
+        ctx.lineTo(4, -38);
+        ctx.lineTo(7, -8);
+        ctx.lineTo(-7, -8);
+        ctx.closePath();
+        ctx.fillStyle = barrelGrad;
+        ctx.fill();
+        ctx.strokeStyle = `rgba(0, 255, 213, ${glow * 0.45})`;
+        ctx.lineWidth = 1;
         ctx.stroke();
 
-        // Cockpit
+        // Muzzle brake ring
+        ctx.fillStyle = steelLight;
+        ctx.fillRect(-5, -38, 10, 4);
+
+        // Receiver / slide (thân súng)
+        const bodyGrad = ctx.createLinearGradient(0, -8, 0, 16);
+        bodyGrad.addColorStop(0, steelLight);
+        bodyGrad.addColorStop(1, steelDark);
         ctx.beginPath();
-        ctx.ellipse(0, -5, 4, 8, 0, 0, Math.PI * 2);
+        ctx.moveTo(-15, -8);
+        ctx.lineTo(15, -8);
+        ctx.lineTo(15, 8);
+        ctx.quadraticCurveTo(15, 16, 9, 16);
+        ctx.lineTo(-9, 16);
+        ctx.quadraticCurveTo(-15, 16, -15, 8);
+        ctx.closePath();
+        ctx.fillStyle = bodyGrad;
+        ctx.fill();
+
+        // Slide serrations (grooves)
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+        ctx.lineWidth = 1.2;
+        for (let i = 0; i < 3; i++) {
+            const sy = -4 + i * 6;
+            ctx.beginPath();
+            ctx.moveTo(-14, sy);
+            ctx.lineTo(-5, sy);
+            ctx.stroke();
+        }
+
+        // Energy cell (side vent glow)
+        ctx.save();
+        ctx.shadowColor = neon;
+        ctx.shadowBlur = 8 * glow;
+        ctx.beginPath();
+        ctx.ellipse(11, 1, 2.5, 6, 0, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(0, 255, 213, ${glow})`;
         ctx.fill();
+        ctx.restore();
 
-        // Engine glow
+        // Grip (tay cầm)
+        const gripGrad = ctx.createLinearGradient(0, 16, 0, 34);
+        gripGrad.addColorStop(0, steel);
+        gripGrad.addColorStop(1, steelDark);
         ctx.beginPath();
-        ctx.moveTo(-6, 18);
-        ctx.lineTo(0, 18 + 8 + glow * 6);
-        ctx.lineTo(6, 18);
-        ctx.fillStyle = `rgba(0, 170, 255, ${glow * 0.8})`;
+        ctx.moveTo(-9, 16);
+        ctx.lineTo(10, 16);
+        ctx.lineTo(7, 34);
+        ctx.lineTo(-6, 34);
+        ctx.closePath();
+        ctx.fillStyle = gripGrad;
         ctx.fill();
 
-        // Wing tips
+        // Trigger guard
         ctx.beginPath();
-        ctx.arc(-18, 20, 2, 0, Math.PI * 2);
-        ctx.arc(18, 20, 2, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(0, 255, 213, ${glow})`;
-        ctx.fill();
+        ctx.ellipse(-2, 18, 8, 9, 0, 0, Math.PI * 2);
+        ctx.strokeStyle = steelLight;
+        ctx.lineWidth = 2;
+        ctx.stroke();
 
-        // Ship glow aura
-        ctx.shadowColor = '#00ffd5';
-        ctx.shadowBlur = 20 * glow;
+        // Trigger
         ctx.beginPath();
-        ctx.arc(0, 0, 2, 0, Math.PI * 2);
-        ctx.fillStyle = 'transparent';
-        ctx.fill();
-        ctx.shadowBlur = 0;
+        ctx.moveTo(0, 14);
+        ctx.lineTo(-4, 20);
+        ctx.strokeStyle = `rgba(0, 255, 213, ${glow * 0.85})`;
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.stroke();
 
         ctx.restore();
     }

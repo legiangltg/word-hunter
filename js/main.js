@@ -39,9 +39,48 @@
     // Update high score display
     document.getElementById('menuHighScore').textContent = game.highScore.toLocaleString();
 
+    // --- Mobile (touch) keyboard support ---
+    const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    const mobileInput = document.getElementById('mobileInput');
+    const focusKeyboard = () => {
+        if (isTouch && mobileInput && game.state === GameState.PLAYING) {
+            mobileInput.focus({ preventScroll: true });
+        }
+    };
+    const blurKeyboard = () => {
+        if (mobileInput) mobileInput.blur();
+    };
+
+    if (mobileInput) {
+        // Read characters from the virtual keyboard
+        mobileInput.addEventListener('input', () => {
+            const value = mobileInput.value.toLowerCase();
+            for (const ch of value) {
+                if (/[a-z]/.test(ch)) game.handleKeyPress(ch);
+            }
+            mobileInput.value = '';
+        });
+        // If focus is lost while still playing, bring the keyboard back
+        mobileInput.addEventListener('blur', () => {
+            if (game.state === GameState.PLAYING) {
+                setTimeout(focusKeyboard, 20);
+            }
+        });
+    }
+
+    // Auto-hide the keyboard whenever the game leaves the PLAYING state
+    let lastState = game.state;
+    setInterval(() => {
+        if (game.state !== lastState) {
+            lastState = game.state;
+            if (game.state !== GameState.PLAYING) blurKeyboard();
+        }
+    }, 120);
+
     // --- Button Event Listeners ---
     document.getElementById('btnStart').addEventListener('click', () => {
         game.startGame();
+        focusKeyboard();
         // Auto-play YouTube music if URL is set
         const url = document.getElementById('youtubeUrl').value;
         if (url) {
@@ -72,6 +111,7 @@
 
     document.getElementById('btnResume').addEventListener('click', () => {
         game.resume();
+        focusKeyboard();
     });
 
     document.getElementById('btnQuit').addEventListener('click', () => {
@@ -81,6 +121,7 @@
     document.getElementById('btnPlayAgain').addEventListener('click', () => {
         game._hideScreen('gameOverScreen');
         game.startGame();
+        focusKeyboard();
         const url = document.getElementById('youtubeUrl').value;
         if (url) game.audio.playMusic(url);
     });
@@ -123,6 +164,9 @@
 
     // --- Keyboard Input ---
     document.addEventListener('keydown', (e) => {
+        // On touch devices, letters arrive via the mobile input (avoid double count)
+        if (e.target === mobileInput && e.key.length === 1 && /[a-zA-Z]/.test(e.key)) return;
+
         // Prevent default for game keys when playing
         if (game.state === GameState.PLAYING) {
             if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {

@@ -52,6 +52,10 @@ class Game {
         this._boundLoop = this._loop.bind(this);
         this._resize();
         window.addEventListener('resize', () => this._resize());
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', () => this._resize());
+            window.visualViewport.addEventListener('scroll', () => this._resize());
+        }
     }
 
     registerLanguage(code, langData) {
@@ -80,13 +84,15 @@ class Game {
 
     _resize() {
         const dpr = window.devicePixelRatio || 1;
-        this.canvas.width = window.innerWidth * dpr;
-        this.canvas.height = window.innerHeight * dpr;
-        this.canvas.style.width = window.innerWidth + 'px';
-        this.canvas.style.height = window.innerHeight + 'px';
+        const vw = window.visualViewport ? window.visualViewport.width : window.innerWidth;
+        const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        this.canvas.width = vw * dpr;
+        this.canvas.height = vh * dpr;
+        this.canvas.style.width = vw + 'px';
+        this.canvas.style.height = vh + 'px';
         this.ctx.scale(dpr, dpr);
-        this.width = window.innerWidth;
-        this.height = window.innerHeight;
+        this.width = vw;
+        this.height = vh;
         this.player.resize();
         this.starfield.resize();
     }
@@ -119,6 +125,11 @@ class Game {
         this.player.lasers = [];
         this.waveOverlay = null;
 
+        // Hide all other screens before showing the HUD
+        this._hideScreen('menuScreen');
+        this._hideScreen('settingsScreen');
+        this._hideScreen('gameOverScreen');
+        this._hideScreen('pauseScreen');
         this._showScreen('gameHUD');
     }
 

@@ -2,7 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Word Hunter">
+    <meta name="theme-color" content="#060612">
     <title>Word Hunter – Type to Destroy</title>
     <meta name="description" content="A space typing game to learn vocabulary. Type English words to shoot enemy ships and learn translations!">
     <meta property="og:title" content="Word Hunter – Type to Destroy">
@@ -15,6 +20,9 @@
 <body>
     <!-- Game Canvas -->
     <canvas id="gameCanvas"></canvas>
+
+    <!-- Hidden input to summon the mobile keyboard (touch devices) -->
+    <input id="mobileInput" type="text" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-hidden="true" />
 
     <!-- UI Overlay -->
     <div id="uiOverlay">
