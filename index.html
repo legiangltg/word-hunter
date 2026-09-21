@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Hunter – Type to Destroy</title>
+    <meta name="description" content="A space typing game to learn vocabulary. Type English words to shoot enemy ships and learn translations!">
+    <meta property="og:title" content="Word Hunter – Type to Destroy">
+    <meta property="og:description" content="A space typing game to learn vocabulary. Destroy enemies by typing words!">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Game Canvas -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- UI Overlay -->
+    <div id="uiOverlay">
+        <!-- Menu Screen -->
+        <div id="menuScreen" class="screen active">
+            <div class="menu-content">
+                <h1 class="game-title">
+                    <span class="title-word">WORD</span>
+                    <span class="title-hunter">HUNTER</span>
+                </h1>
+                <p class="game-subtitle">Type to Destroy • Learn to Conquer</p>
+                <div class="menu-buttons">
+                    <button id="btnStart" class="btn btn-primary">
+                        <span class="btn-icon">▶</span> START GAME
+                    </button>
+                    <button id="btnSettings" class="btn btn-secondary">
+                        <span class="btn-icon">⚙</span> SETTINGS
+                    </button>
+                </div>
+                <div class="high-score-display">
+                    <span class="label">HIGH SCORE</span>
+                    <span id="menuHighScore" class="value">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Screen -->
+        <div id="settingsScreen" class="screen">
+            <div class="settings-content">
+                <h2 class="settings-title">⚙ SETTINGS</h2>
+                
+                <div class="settings-group">
+                    <label class="settings-label">🌐 Target Language</label>
+                    <select id="langSelect" class="settings-select">
+                        <option value="vi">🇻🇳 Tiếng Việt</option>
+                    </select>
+                </div>
+
+                <div class="settings-group">
+                    <label class="settings-label">🎯 Difficulty</label>
+                    <select id="difficultySelect" class="settings-select">
+                        <option value="easy">Easy – Slow enemies, basic words</option>
+                        <option value="normal" selected>Normal – Balanced gameplay</option>
+                        <option value="hard">Hard – Fast enemies, complex words</option>
+                    </select>
+                </div>
+
+                <div class="settings-group">
+                    <label class="settings-label">🎵 YouTube Background Music</label>
+                    <input type="text" id="youtubeUrl" class="settings-input" 
+                           placeholder="Paste YouTube URL here...">
+                    <div class="music-controls">
+                        <button id="btnMusicPlay" class="btn btn-small">▶ Play</button>
+                        <button id="btnMusicPause" class="btn btn-small">⏸ Pause</button>
+                        <input type="range" id="musicVolume" min="0" max="100" value="30" class="volume-slider">
+                        <span class="volume-label">🔊 <span id="musicVolumeLabel">30</span>%</span>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <label class="settings-label">🔫 SFX Volume</label>
+                    <input type="range" id="sfxVolume" min="0" max="100" value="60" class="volume-slider">
+                    <span class="volume-label">🔊 <span id="sfxVolumeLabel">60</span>%</span>
+                </div>
+
+                <button id="btnBackToMenu" class="btn btn-secondary">
+                    ← BACK TO MENU
+                </button>
+            </div>
+        </div>
+
+        <!-- In-Game HUD -->
+        <div id="gameHUD" class="screen">
+            <div class="hud-top-left">
+                <div class="hud-item">
+                    <span class="hud-label">SCORE</span>
+                    <span id="hudScore" class="hud-value">0</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">WAVE</span>
+                    <span id="hudWave" class="hud-value">1</span>
+                </div>
+            </div>
+            <div class="hud-top-right">
+                <div class="hud-item">
+                    <span class="hud-label">WPM</span>
+                    <span id="hudWpm" class="hud-value">0</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">ACCURACY</span>
+                    <span id="hudAccuracy" class="hud-value">100%</span>
+                </div>
+            </div>
+            <div class="hud-top-center">
+                <div id="hudCombo" class="combo-display hidden">
+                    <span class="combo-count">0</span>
+                    <span class="combo-label">COMBO</span>
+                </div>
+            </div>
+            <div class="hud-bottom">
+                <div class="lives-display">
+                    <span id="hudLives">♥ ♥ ♥</span>
+                </div>
+                <div class="input-display">
+                    <span id="hudInput" class="current-input"></span>
+                </div>
+            </div>
+            <button id="btnPause" class="btn-icon-only" title="Pause">⏸</button>
+        </div>
+
+        <!-- Pause Screen -->
+        <div id="pauseScreen" class="screen overlay">
+            <div class="pause-content">
+                <h2 class="pause-title">⏸ PAUSED</h2>
+                <div class="menu-buttons">
+                    <button id="btnResume" class="btn btn-primary">▶ RESUME</button>
+                    <button id="btnQuit" class="btn btn-secondary">✕ QUIT TO MENU</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="gameOverScreen" class="screen overlay">
+            <div class="gameover-content">
+                <h2 class="gameover-title">GAME OVER</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-value" id="goScore">0</span>
+                        <span class="stat-label">SCORE</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="goWave">1</span>
+                        <span class="stat-label">WAVE</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="goWords">0</span>
+                        <span class="stat-label">WORDS</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="goWpm">0</span>
+                        <span class="stat-label">WPM</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="goAccuracy">0%</span>
+                        <span class="stat-label">ACCURACY</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="goCombo">0</span>
+                        <span class="stat-label">MAX COMBO</span>
+                    </div>
+                </div>
+                <div id="missedWordsSection" class="missed-words">
+                    <h3>📝 Words to Review</h3>
+                    <div id="missedWordsList" class="missed-words-list"></div>
+                </div>
+                <div class="menu-buttons">
+                    <button id="btnPlayAgain" class="btn btn-primary">🔄 PLAY AGAIN</button>
+                    <button id="btnBackMenu" class="btn btn-secondary">← MENU</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- YouTube Player (hidden) -->
+    <div id="youtubePlayerContainer" style="position:absolute;top:-9999px;left:-9999px;">
+        <div id="youtubePlayer"></div>
+    </div>
+
+    <!-- Scripts (order matters) -->
+    <script src="js/data/words-level1.js"></script>
+    <script src="js/data/words-level2.js"></script>
+    <script src="js/data/words-level3.js"></script>
+    <script src="js/data/words-level4.js"></script>
+    <script src="js/data/words-level5.js"></script>
+    <script src="js/data/words-level6.js"></script>
+    <script src="js/data/words-level7.js"></script>
+    <script src="js/data/words-level8.js"></script>
+    <script src="js/data/words-level9.js"></script>
+    <script src="js/data/words-level10.js"></script>
+    <script src="js/data/words.js"></script>
+    <script src="js/data/lang-vi.js"></script>
+    <script src="js/starfield.js"></script>
+    <script src="js/particles.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/enemy.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
