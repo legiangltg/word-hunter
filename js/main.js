@@ -77,8 +77,12 @@
         }
     }, 120);
 
-    // Tap anywhere during play (except buttons/inputs) to bring the keyboard back
+    // On any touch/click, unlock & resume audio (iOS suspends AudioContext until a gesture)
+    // and, during play, tapping the screen also brings the mobile keyboard back.
     document.addEventListener('pointerdown', (e) => {
+        game.audio.init();
+        game.audio.resume();
+
         if (game.state !== GameState.PLAYING) return;
         if (e.target && e.target.closest && e.target.closest('button, select, input, a')) return;
         focusKeyboard();

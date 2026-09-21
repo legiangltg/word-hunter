@@ -411,12 +411,16 @@ class Game {
             comboEl.classList.add('hidden');
         }
 
-        // Lives
-        let livesStr = '';
-        for (let i = 0; i < this.maxLives; i++) {
-            livesStr += i < this.lives ? '♥ ' : '♡ ';
+        // Lives (5 hearts in a row)
+        const livesEl = document.getElementById('hudLives');
+        if (livesEl) {
+            const hearts = livesEl.querySelectorAll('.heart');
+            for (let i = 0; i < hearts.length; i++) {
+                const alive = i < this.lives;
+                hearts[i].textContent = alive ? '♥' : '♡';
+                hearts[i].classList.toggle('empty', !alive);
+            }
         }
-        document.getElementById('hudLives').textContent = livesStr.trim();
 
         // Current input
         const target = this.enemies.activeTarget;
