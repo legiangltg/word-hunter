@@ -31,8 +31,8 @@ class Game {
 
         // Stats
         this.score = 0;
-        this.lives = 3;
-        this.maxLives = 3;
+        this.lives = 5;
+        this.maxLives = 5;
         this.combo = 0;
         this.maxCombo = 0;
         this.wordsDestroyed = 0;
@@ -86,15 +86,16 @@ class Game {
         const dpr = window.devicePixelRatio || 1;
         const vw = window.visualViewport ? window.visualViewport.width : window.innerWidth;
         const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-        this.canvas.width = vw * dpr;
-        this.canvas.height = vh * dpr;
+        this.canvas.width = Math.round(vw * dpr);
+        this.canvas.height = Math.round(vh * dpr);
         this.canvas.style.width = vw + 'px';
         this.canvas.style.height = vh + 'px';
-        this.ctx.scale(dpr, dpr);
+        this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         this.width = vw;
         this.height = vh;
-        this.player.resize();
-        this.starfield.resize();
+        this.player.resize(vw, vh);
+        this.starfield.resize(vw, vh);
+        this.enemies.resize(vw, vh);
     }
 
     start() {
@@ -108,7 +109,7 @@ class Game {
         this.audio.resume();
         this.state = GameState.PLAYING;
         this.score = 0;
-        this.lives = 3;
+        this.lives = this.maxLives;
         this.combo = 0;
         this.maxCombo = 0;
         this.wordsDestroyed = 0;

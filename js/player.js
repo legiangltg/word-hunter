@@ -4,17 +4,17 @@
 class Player {
     constructor(canvas) {
         this.canvas = canvas;
-        this.x = canvas.width / 2;
-        this.y = canvas.height - 80;
+        this.x = 0;
+        this.y = 0;
         this.width = 40;
         this.height = 50;
         this.glowPhase = 0;
         this.lasers = []; // Active laser beams
     }
 
-    resize() {
-        this.x = this.canvas.width / 2;
-        this.y = this.canvas.height - 80;
+    resize(w, h) {
+        this.x = w / 2;
+        this.y = h - 80;
     }
 
     fireLaser(targetX, targetY) {

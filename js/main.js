@@ -77,6 +77,13 @@
         }
     }, 120);
 
+    // Tap anywhere during play (except buttons/inputs) to bring the keyboard back
+    document.addEventListener('pointerdown', (e) => {
+        if (game.state !== GameState.PLAYING) return;
+        if (e.target && e.target.closest && e.target.closest('button, select, input, a')) return;
+        focusKeyboard();
+    });
+
     // --- Button Event Listeners ---
     document.getElementById('btnStart').addEventListener('click', () => {
         game.startGame();

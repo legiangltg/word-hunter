@@ -167,6 +167,8 @@ class Enemy {
 class EnemyManager {
     constructor(canvas) {
         this.canvas = canvas;
+        this.width = window.innerWidth || canvas.width;
+        this.height = window.innerHeight || canvas.height;
         this.enemies = [];
         this.spawnTimer = 0;
         this.wave = 1;
@@ -185,10 +187,15 @@ class EnemyManager {
         this.difficulty = diff;
     }
 
+    resize(w, h) {
+        this.width = w;
+        this.height = h;
+    }
+
     buildWordPool(wordData, translations) {
         // Build pool based on current wave difficulty
         this.wordPool = [];
-        const maxLevel = Math.min(10, Math.floor(this.wave / 3) + 2);
+        const maxLevel = Math.min(10, Math.floor(this.wave / 4) + 2);
         const minLevel = Math.max(1, maxLevel - 3);
 
         for (const w of wordData) {
@@ -209,17 +216,17 @@ class EnemyManager {
 
     getSpawnInterval() {
         const base = { easy: 3.0, normal: 2.0, hard: 1.2 }[this.difficulty] || 2.0;
-        return Math.max(0.5, base - this.wave * 0.08);
+        return Math.max(0.9, base - this.wave * 0.05);
     }
 
     getEnemySpeed() {
         const base = { easy: 0.3, normal: 0.5, hard: 0.8 }[this.difficulty] || 0.5;
-        return base + this.wave * 0.03 + Math.random() * 0.2;
+        return Math.min(base + 0.5, base + this.wave * 0.02 + Math.random() * 0.08);
     }
 
     getMaxWordsInWave() {
         const base = { easy: 4, normal: 5, hard: 7 }[this.difficulty] || 5;
-        return base + Math.floor(this.wave * 0.8);
+        return Math.min(base + 12, base + Math.floor(this.wave * 0.4));
     }
 
     spawnEnemy(wordData, translations) {
@@ -237,7 +244,7 @@ class EnemyManager {
         this.usedWords.add(wordEntry.en);
 
         const margin = 60;
-        const x = margin + Math.random() * (this.canvas.width - margin * 2);
+        const x = margin + Math.random() * (this.width - margin * 2);
         const y = -30;
         const speed = this.getEnemySpeed();
 

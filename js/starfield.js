@@ -4,6 +4,8 @@
 class StarField {
     constructor(canvas) {
         this.canvas = canvas;
+        this.width = window.innerWidth || canvas.width;
+        this.height = window.innerHeight || canvas.height;
         this.layers = [];
         this.layerCount = 3;
         this.starsPerLayer = [120, 80, 40];
@@ -22,8 +24,8 @@ class StarField {
             const stars = [];
             for (let i = 0; i < this.starsPerLayer[l]; i++) {
                 stars.push({
-                    x: Math.random() * this.canvas.width,
-                    y: Math.random() * this.canvas.height,
+                    x: Math.random() * this.width,
+                    y: Math.random() * this.height,
                     twinkle: Math.random() * Math.PI * 2,
                     twinkleSpeed: 0.02 + Math.random() * 0.04
                 });
@@ -32,11 +34,13 @@ class StarField {
         }
     }
 
-    resize() {
+    resize(w, h) {
+        this.width = w;
+        this.height = h;
         for (let l = 0; l < this.layerCount; l++) {
             for (const star of this.layers[l]) {
-                if (star.x > this.canvas.width) star.x = Math.random() * this.canvas.width;
-                if (star.y > this.canvas.height) star.y = Math.random() * this.canvas.height;
+                if (star.x > this.width) star.x = Math.random() * this.width;
+                if (star.y > this.height) star.y = Math.random() * this.height;
             }
         }
     }
@@ -46,9 +50,9 @@ class StarField {
             for (const star of this.layers[l]) {
                 star.y += this.speeds[l] * dt * 60;
                 star.twinkle += star.twinkleSpeed;
-                if (star.y > this.canvas.height) {
+                if (star.y > this.height) {
                     star.y = -5;
-                    star.x = Math.random() * this.canvas.width;
+                    star.x = Math.random() * this.width;
                 }
             }
         }
