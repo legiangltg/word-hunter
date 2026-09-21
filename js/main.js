@@ -95,6 +95,7 @@
         // Auto-play YouTube music if URL is set
         const url = document.getElementById('youtubeUrl').value;
         if (url) {
+            localStorage.setItem('wordHunterYoutubeUrl', url);
             game.audio.playMusic(url);
         }
     });
@@ -144,6 +145,11 @@
     });
 
     // --- Settings Controls ---
+    // Auto-save the YouTube link as soon as it's typed or pasted
+    document.getElementById('youtubeUrl').addEventListener('input', (e) => {
+        localStorage.setItem('wordHunterYoutubeUrl', e.target.value);
+    });
+
     document.getElementById('langSelect').addEventListener('change', (e) => {
         game.setLanguage(e.target.value);
     });

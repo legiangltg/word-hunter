@@ -109,7 +109,8 @@ class Game {
         this.audio.resume();
         this.state = GameState.PLAYING;
         this.score = 0;
-        this.lives = this.maxLives;
+        this.lives = 5;
+        this.maxLives = 5;
         this.combo = 0;
         this.maxCombo = 0;
         this.wordsDestroyed = 0;
@@ -118,6 +119,7 @@ class Game {
         this.missedWords = [];
         this.startTime = Date.now();
         this.enemies.reset();
+        this._lastWave = 1;
         this.enemies.setDifficulty(
             document.getElementById('difficultySelect')?.value || 'normal'
         );
@@ -297,6 +299,15 @@ class Game {
         this.enemies.update(dt, this.wordData, this.translations);
         this.particles.update(dt);
 
+        // Award a heart every 5 waves
+        if (this.enemies.wave !== this._lastWave) {
+            const newWave = this.enemies.wave;
+            if (newWave > 1 && newWave % 5 === 1) {
+                this._awardHeart();
+            }
+            this._lastWave = newWave;
+        }
+
         // Check wave change
         const prevWave = this.enemies.wave;
         if (this.enemies.betweenWaves && !this.waveOverlay) {
@@ -387,6 +398,13 @@ class Game {
         ctx.restore();
     }
 
+    _awardHeart() {
+        this.maxLives++;
+        this.lives = Math.min(this.lives + 1, this.maxLives);
+        this.audio.playLevelUp();
+        this._updateHUD();
+    }
+
     _updateHUD() {
         document.getElementById('hudScore').textContent = this.score.toLocaleString();
         document.getElementById('hudWave').textContent = this.enemies.wave;
@@ -411,15 +429,15 @@ class Game {
             comboEl.classList.add('hidden');
         }
 
-        // Lives (5 hearts in a row)
+        // Lives (hearts grow as maxLives increases)
         const livesEl = document.getElementById('hudLives');
         if (livesEl) {
-            const hearts = livesEl.querySelectorAll('.heart');
-            for (let i = 0; i < hearts.length; i++) {
+            let html = '';
+            for (let i = 0; i < this.maxLives; i++) {
                 const alive = i < this.lives;
-                hearts[i].textContent = alive ? '♥' : '♡';
-                hearts[i].classList.toggle('empty', !alive);
+                html += `<span class="heart${alive ? '' : ' empty'}">${alive ? '♥' : '♡'}</span>`;
             }
+            livesEl.innerHTML = html;
         }
 
         // Current input
