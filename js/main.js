@@ -56,7 +56,7 @@
         mobileInput.addEventListener('input', () => {
             const value = mobileInput.value.toLowerCase();
             for (const ch of value) {
-                if (/[a-z]/.test(ch)) game.handleKeyPress(ch);
+                if (/^[\p{L} ]$/u.test(ch)) game.handleKeyPress(ch);
             }
             mobileInput.value = '';
         });
@@ -152,6 +152,7 @@
 
     document.getElementById('langSelect').addEventListener('change', (e) => {
         game.setLanguage(e.target.value);
+        localStorage.setItem('wordHunterLang', e.target.value);
     });
 
     document.getElementById('sfxVolume').addEventListener('input', (e) => {
@@ -182,11 +183,11 @@
     // --- Keyboard Input ---
     document.addEventListener('keydown', (e) => {
         // On touch devices, letters arrive via the mobile input (avoid double count)
-        if (e.target === mobileInput && e.key.length === 1 && /[a-zA-Z]/.test(e.key)) return;
+        if (e.target === mobileInput && e.key.length === 1 && /^[\p{L} ]$/u.test(e.key)) return;
 
         // Prevent default for game keys when playing
         if (game.state === GameState.PLAYING) {
-            if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
+            if (e.key.length === 1 && /^[\p{L} ]$/u.test(e.key)) {
                 e.preventDefault();
                 game.handleKeyPress(e.key);
             }

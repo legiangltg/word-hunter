@@ -181,10 +181,15 @@ class EnemyManager {
         this.usedWords = new Set();
         this.wordPool = [];
         this.difficulty = 'normal';
+        this.mode = 'vi'; // 'vi' = type English → reveal Vietnamese; 'en' = type Vietnamese → reveal English
     }
 
     setDifficulty(diff) {
         this.difficulty = diff;
+    }
+
+    setMode(mode) {
+        this.mode = mode === 'en' ? 'en' : 'vi';
     }
 
     resize(w, h) {
@@ -199,11 +204,17 @@ class EnemyManager {
         const minLevel = Math.max(1, maxLevel - 3);
 
         for (const w of wordData) {
-            if (w.level >= minLevel && w.level <= maxLevel && !this.usedWords.has(w.en)) {
-                const trans = translations[w.en];
-                if (trans) {
-                    this.wordPool.push({ en: w.en, translation: trans });
-                }
+            if (w.level < minLevel || w.level > maxLevel) continue;
+            const trans = translations[w.en];
+            if (!trans) continue;
+
+            // 'vi': type the English word, reveal the Vietnamese meaning
+            // 'en': type the Vietnamese word, reveal the English word
+            const word = (this.mode === 'en' ? trans : w.en).toLowerCase();
+            const reveal = this.mode === 'en' ? w.en : trans;
+
+            if (!this.usedWords.has(word)) {
+                this.wordPool.push({ word: word, translation: reveal });
             }
         }
 
@@ -241,14 +252,14 @@ class EnemyManager {
         if (this.wordPool.length === 0) return;
 
         const wordEntry = this.wordPool.pop();
-        this.usedWords.add(wordEntry.en);
+        this.usedWords.add(wordEntry.word);
 
         const margin = 60;
         const x = margin + Math.random() * (this.width - margin * 2);
         const y = -30;
         const speed = this.getEnemySpeed();
 
-        const enemy = new Enemy(x, y, wordEntry.en, wordEntry.translation, speed);
+        const enemy = new Enemy(x, y, wordEntry.word, wordEntry.translation, speed);
         this.enemies.push(enemy);
         this.wordsInWave++;
     }

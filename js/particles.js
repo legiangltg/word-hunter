@@ -145,7 +145,10 @@ class ParticleSystem {
             ctx.save();
             ctx.globalAlpha = p.alpha;
             ctx.translate(p.x, p.y);
-            ctx.rotate(p.rotation);
+            // Text must always stay upright (never tilted / rotated / mirrored)
+            if (p.type !== 'text') {
+                ctx.rotate(p.rotation);
+            }
 
             if (p.type === 'text') {
                 // Scale animation for translation popup

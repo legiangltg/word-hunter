@@ -27,6 +27,7 @@ class Game {
         this.wordData = typeof WORD_DATA !== 'undefined' ? WORD_DATA : [];
         this.languages = {};
         this.currentLang = 'vi';
+        this.targetLang = 'vi';
         this.translations = {};
 
         // Stats
@@ -76,9 +77,13 @@ class Game {
     }
 
     setLanguage(code) {
+        this.targetLang = code;
         if (this.languages[code]) {
             this.currentLang = code;
             this.translations = this.languages[code].translations;
+        }
+        if (this.enemies) {
+            this.enemies.setMode(code);
         }
     }
 
@@ -123,6 +128,7 @@ class Game {
         this.enemies.setDifficulty(
             document.getElementById('difficultySelect')?.value || 'normal'
         );
+        this.enemies.setMode(this.targetLang);
         this.enemies.buildWordPool(this.wordData, this.translations);
         this.particles.clear();
         this.player.lasers = [];
@@ -176,7 +182,13 @@ class Game {
         if (this.state !== GameState.PLAYING) return;
 
         const char = key.toLowerCase();
-        if (!/^[a-z]$/.test(char)) return;
+        if (!/^[\p{L} ]$/u.test(char)) return;
+
+        // Ignore stray spaces unless the current word actually needs one
+        if (char === ' ') {
+            const t = this.enemies.activeTarget;
+            if (!t || t.nextChar !== ' ') return;
+        }
 
         this.totalKeysPressed++;
         const target = this.enemies.activeTarget;
