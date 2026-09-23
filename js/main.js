@@ -39,11 +39,18 @@
     // Update high score display
     document.getElementById('menuHighScore').textContent = game.highScore.toLocaleString();
 
-    // --- Mobile (touch) keyboard support ---
-    const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    // --- Typing input (physical + on-screen keyboard, supports IME / Vietnamese Telex) ---
     const mobileInput = document.getElementById('mobileInput');
+    let inputTimer = null;
+
+    const commitTyped = (text) => {
+        for (const ch of (text || '').toLowerCase()) {
+            if (/^[\p{L} ]$/u.test(ch)) game.handleKeyPress(ch);
+        }
+    };
+
     const focusKeyboard = () => {
-        if (isTouch && mobileInput && game.state === GameState.PLAYING) {
+        if (mobileInput && game.state === GameState.PLAYING) {
             mobileInput.focus({ preventScroll: true });
         }
     };
@@ -52,13 +59,16 @@
     };
 
     if (mobileInput) {
-        // Read characters from the virtual keyboard
+        // Read typed text after it settles, so IME composition (e.g. UniKey Telex) is complete
         mobileInput.addEventListener('input', () => {
-            const value = mobileInput.value.toLowerCase();
-            for (const ch of value) {
-                if (/^[\p{L} ]$/u.test(ch)) game.handleKeyPress(ch);
-            }
-            mobileInput.value = '';
+            clearTimeout(inputTimer);
+            inputTimer = setTimeout(() => {
+                const value = mobileInput.value;
+                if (value) {
+                    commitTyped(value);
+                    mobileInput.value = '';
+                }
+            }, 50);
         });
         // If focus is lost while still playing, bring the keyboard back
         mobileInput.addEventListener('blur', () => {
@@ -207,6 +217,7 @@
 
     // Prevent focus issues with settings inputs
     document.querySelectorAll('input, select').forEach(el => {
+        if (el === mobileInput) return; // keep Escape (pause) working while typing
         el.addEventListener('keydown', (e) => {
             e.stopPropagation();
         });
